@@ -1,0 +1,35 @@
+How to get TLS Certs
+
+
+INSTALL NODE VIA NVM
+https://www.digitalocean.com/community/tutorials/how-to-install-node-js-with-nvm-node-version-manager-on-a-vps
+
+curl https://raw.githubusercontent.com/creationix/nvm/v0.11.1/install.sh | bash
+source ~/.profile
+nvm install v4.4.2
+nvm use v4.4.2
+
+// SET IPTABLES TO ROUTE 80 TO 3001
+sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3001
+
+//CODE FOR STARTING A SUPER BASIC HTTP SERVER TO VERIFY DOMAIN
+
+var express = require('express');
+
+var server = express();
+server.use(express.static(__dirname + '/public'));
+
+var port = 3001;
+server.listen(port, function() {
+    console.log('server listening on port ' + port);
+});
+
+//START TLS PROCESS
+
+wget https://dl.eff.org/certbot-auto
+
+chmod a+x ./certbot-auto
+
+./certbot-auto certonly --webroot --email admin@rsmaps.org -d sasav.us
+
+//INSERT SCREENSHOTS HERE
