@@ -30,6 +30,6 @@ wget https://dl.eff.org/certbot-auto
 
 chmod a+x ./certbot-auto
 
-./certbot-auto certonly --webroot --email admin@rsmaps.org -d sasav.us
+./certbot-auto certonly --webroot --email admin@domain.org -d [YOUR DOMAIN]
 
 //INSERT SCREENSHOTS HERE
