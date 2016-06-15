@@ -28,7 +28,7 @@ var enforce = require('express-sslify');
 
 var Bot = require('slackbots');
 var settings = {
-    token: 'GET YOUR TOKEN', // Learn more Here https://api.slack.com/bot-users
+    token: '<GET YOUR TOKEN>', // Learn more Here https://api.slack.com/bot-users
     name: 'adverts' // Name of Bot
 };
 var bot = new Bot(settings);
@@ -142,7 +142,7 @@ app.route('/B')
                 console.log('Page B Beaconed')
             });
         res.render('B', {
-            msg: msgA
+            msg: msgB
         });
     })
    .post(function(req, res) {
@@ -160,5 +160,44 @@ app.route('/B')
             },
             function(err, inserted) {
                 console.log('Page B Visited')
+            });
+   });
+
+app.route('/')
+   .get( function(req, res) {
+        bot.postMessageToChannel('advertbot', 'Beacon Loaded Root')
+        db.collection('pages').update({
+                "pageID": 'root'
+            }, {
+                $push: {
+                    beacon: {
+                        "timestamp": new Date().getTime()
+                    }
+                }
+            }, {
+                upsert: true
+            },
+            function(err, inserted) {
+                console.log('Page Root Beaconed')
+            });
+        res.render('B', {
+            msg: msgA
+        });
+    })
+   .post(function(req, res) {
+        bot.postMessageToChannel('advertbot', 'User Interacted with Page Root')
+        db.collection('pages').update({
+                "pageID": 'Root'
+            }, {
+                $push: {
+                    beacon: {
+                        "interaction": new Date().getTime()
+                    }
+                }
+            }, {
+                upsert: true
+            },
+            function(err, inserted) {
+                console.log('Page Root Visited')
             });
    });

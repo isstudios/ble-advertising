@@ -33,8 +33,9 @@ parser.add_option("-v", "--verbose", dest="verbose",
 
 (options, args) = parser.parse_args()
 
-# The default uri
+# The default URIs
 uri = "https://goo.gl/SkcDTN"
+uri0 = "https://goo.gl/SkcDTN"
 
 if len(args) > 0:
     uri = args[0]
@@ -113,7 +114,7 @@ def encodeMessage(uri):
             0xfe,   # 16-bit Eddystone UUID
 
             0x10,   # Eddystone-URL frame type
-            0xed,   # txpower
+            0xed,   # txpower The value 0x12 is interpreted as +18dBm // The value 0xEE is interpreted as -18dBm
             ]
 
     message += encodedUri
@@ -121,39 +122,49 @@ def encodeMessage(uri):
     return message
 
 
-def advertise(uri):
+def advertise(uri,uri0):
+    # START MESSAGE 1
     verboseOutput("Advertising: " + uri)
     message = encodeMessage(uri)
-
     # Prepend the length of the whole message
     message.insert(0, len(message))
-
     # Pad message to 32 bytes for hcitool
     while len(message) < 32: message.append(0x00)
-
     # Make a list of hex strings from the list of numbers
     message = map(lambda x: "%02x" % x, message)
-
     # Concatenate all the hex strings, separated by spaces
     message = " ".join(message)
     verboseOutput("Message: " + message)
-
     subprocess.call("sudo hciconfig hci0 up", shell = True, stdout = subprocess.DEVNULL)
-
     # Stop advertising
     subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x000a 00", shell = True, stdout = subprocess.DEVNULL)
-
     # Set message
     subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x0008 " + message, shell = True, stdout = subprocess.DEVNULL)
-
     # Resume advertising
     subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x000a 01", shell = True, stdout = subprocess.DEVNULL)
 
+    verboseOutput("Advertising: " + uri0)
+    message0 = encodeMessage(uri0)
+    message0.insert(0, len(message0))
+    # Pad message0 to 32 bytes for hcitool
+    while len(message0) < 32: message0.append(0x00)
+    # Make a list of hex strings from the list of numbers
+    message0 = map(lambda x: "%02x" % x, message0)
+    # Concatenate all the hex strings, separated by spaces
+    message0 = " ".join(message0)
+    verboseOutput("message0: " + message0)
+    subprocess.call("sudo hciconfig hci1 up", shell = True, stdout = subprocess.DEVNULL)
+    # Stop advertising
+    subprocess.call("sudo hcitool -i hci1 cmd 0x08 0x000a 00", shell = True, stdout = subprocess.DEVNULL)
+    # Set message0
+    subprocess.call("sudo hcitool -i hci1 cmd 0x08 0x0008 " + message0, shell = True, stdout = subprocess.DEVNULL)
+    # Resume advertising
+    subprocess.call("sudo hcitool -i hci1 cmd 0x08 0x000a 01", shell = True, stdout = subprocess.DEVNULL)
 
 def stopAdvertising():
     verboseOutput("Stopping advertising")
     subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x000a 00", shell = True, stdout = subprocess.DEVNULL)
-
+    subprocess.call("sudo hcitool -i hci1 cmd 0x08 0x000a 00", shell = True, stdout = subprocess.DEVNULL)
 
 try:
     if options.stop:
